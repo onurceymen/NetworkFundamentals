@@ -2,7 +2,7 @@
 using System.Net.WebSockets;
 using System.Text;
 
-namespace NetworkFundamentals
+namespace NetworkFundamentals.Protokols.HttpProtokols
 {
     public class WebSocketServer
     {

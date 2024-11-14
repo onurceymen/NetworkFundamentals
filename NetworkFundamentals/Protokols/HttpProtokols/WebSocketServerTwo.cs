@@ -2,7 +2,7 @@
 using System.Net.WebSockets;
 using System.Text;
 
-namespace NetworkFundamentals
+namespace NetworkFundamentals.Protokols.HttpProtokols
 {
     public class WebSocketServerTwo
     {
@@ -32,7 +32,7 @@ namespace NetworkFundamentals
                 {
                     HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(null);
                     WebSocket webSocket = webSocketContext.WebSocket;
-                    
+
                     _clients.Add(webSocket);
                     Console.WriteLine("İstemciye Bağlandı");
 
