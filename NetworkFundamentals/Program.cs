@@ -1,14 +1,22 @@
-﻿using NetworkFundamentals.Testers;
+﻿using NetworkFundamentals.NetworkProtokols.HttpProtokols;
 
-Console.Write("TTL değeri için IP adresi veya ana bilgisayar adı girin: ");
-string target = Console.ReadLine();
+Console.WriteLine("Protokol Eğitimi'ne Hoş Geldiniz!");
+Console.WriteLine("Lütfen protokol seçin:");
+Console.WriteLine("1. HTTP/HTTPS");
+// İlerleyen protokoller buraya eklenecek.
 
-if (string.IsNullOrEmpty(target))
+string choice = Console.ReadLine();
+
+switch (choice)
 {
-    Console.WriteLine("Geçerli bir hedef adres girilmelidir.");
-    return;
+    case "1":
+        var httpHandler = new HttpProtocolHandler();
+        await httpHandler.Execute();
+        break;
+
+    default:
+        Console.WriteLine("Geçersiz seçim!");
+        break;
 }
 
-// TtlTester sınıfını oluştur ve TTL kontrolünü başlat
-var ttlTester = new TtlTester(target);
-ttlTester.CheckTtl();
+Console.WriteLine("Program sonlandı.");

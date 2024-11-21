@@ -1,4 +1,4 @@
-﻿namespace NetworkFundamentals.HTTPDesingPaterns
+﻿namespace NetworkFundamentals.NetworkModels
 {
     //Osi Model 7 Katmandan oluşan bir tasarıma Sahip desing dir. Bu katmanlar örnekler ile işlenmiştir
     public class OsiModel

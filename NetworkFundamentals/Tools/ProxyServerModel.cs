@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace NetworkFundamentals.HTTPDesingPaterns
+namespace NetworkFundamentals.Tools
 {
     public class ProxyServerModel
     {
