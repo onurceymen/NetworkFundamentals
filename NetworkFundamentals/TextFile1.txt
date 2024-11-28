@@ -1,0 +1,106 @@
+﻿public class GeoLocationMiddleware
+{
+    private readonly RequestDelegate _next;
+
+    public GeoLocationMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+        
+        // Konum servisini çağırarak ülke kodunu alın
+        var countryCode = await GetCountryCodeByIpAsync(ipAddress);
+        
+        // Ülke kodunu saklayın, böylece her istekte yeniden çağırmanıza gerek kalmaz
+        context.Items["CountryCode"] = countryCode;
+
+        await _next(context);
+    }
+
+    private async Task<string> GetCountryCodeByIpAsync(string ipAddress)
+    {
+        // IP-GeoLocation servisi için bir API isteği yapın (örnek: http://ip-api.com)
+        using var httpClient = new HttpClient();
+        var response = await httpClient.GetAsync($"http://ip-api.com/json/{ipAddress}");
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var geoInfo = JsonSerializer.Deserialize<GeoInfo>(json);
+            return geoInfo?.CountryCode; // "TR" gibi döner
+        }
+        return null;
+    }
+}
+
+public class GeoInfo
+{
+    public string CountryCode { get; set; }
+}
+
+
+
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    app.UseMiddleware<GeoLocationMiddleware>();
+    app.UseRouting();
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
+}
+
+public class GeoRestrictionFilter : IActionFilter
+{
+    private readonly string _allowedCountryCode = "TR"; // Türkiye kodu
+
+    public void OnActionExecuting(ActionExecutingContext context)
+    {
+        var countryCode = context.HttpContext.Items["CountryCode"]?.ToString();
+        
+        if (countryCode != null && countryCode != _allowedCountryCode)
+        {
+            // Yurtdışı kullanıcıları sadece Global modülüne erişebilir
+            var routeData = context.RouteData.Values;
+            var area = routeData["area"]?.ToString();
+            
+            if (area != "TedarikaGlobal") // "TedarikaGlobal" modülüne özel alan adı
+            {
+                context.Result = new RedirectToActionResult("AccessDenied", "Home", null);
+            }
+        }
+    }
+
+    public void OnActionExecuted(ActionExecutedContext context) { }
+}
+
+
+// Startup.cs içerisinde filtreleri global eklemek için:
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddControllersWithViews(options =>
+    {
+        options.Filters.Add<GeoRestrictionFilter>();
+    });
+}
+
+[GeoRestrictionFilter]
+public class SomeController : Controller
+{
+    public IActionResult Index()
+    {
+        return View();
+    }
+}
+
+public class HomeController : Controller
+{
+    public IActionResult AccessDenied()
+    {
+        return View();
+    }
+}
